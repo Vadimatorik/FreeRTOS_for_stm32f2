@@ -1,5 +1,4 @@
-#ifndef FREERTOS_CONFIG_H
-#define FREERTOS_CONFIG_H
+#pragma once
 
 #define configUSE_PREEMPTION        1
 #define configUSE_IDLE_HOOK         0                                      // Во время бездействия функция пользователя не вызывается.
@@ -43,12 +42,11 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 priority values, 0 to 15.  This must correspond to the
 configKERNEL_INTERRUPT_PRIORITY setting.  Here 15 corresponds to the lowest
 NVIC value of 255. */
-#define configLIBRARY_KERNEL_INTERRUPT_PRIORITY	15
+#define configLIBRARY_KERNEL_INTERRUPT_PRIORITY 15
 
 /*
  * FreeRTOS забирает себе эти 2 handler-а.
  */
-#define vPortSVCHandler     SVC_Handler
-#define xPortPendSVHandler  PendSV_Handler
-
-#endif
+#define vPortSVCHandler     sv_call_handler
+#define xPortPendSVHandler  pend_sv_handler
+#define xPortSysTickHandler sys_tick_handler

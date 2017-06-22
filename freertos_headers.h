@@ -1,5 +1,4 @@
-#ifndef FREERTOS_FOR_STM32F2_FREERTOS_HEADERS_H_
-#define FREERTOS_FOR_STM32F2_FREERTOS_HEADERS_H_
+#pragma once
 
 /*
  * Данный файл предназначен для доступа к FreeRTOS методам
@@ -17,6 +16,4 @@ extern "C" {
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif
