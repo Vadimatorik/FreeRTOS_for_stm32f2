@@ -1,13 +1,17 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define configUSE_PREEMPTION        1
 #define configUSE_IDLE_HOOK         0                                      // Во время бездействия функция пользователя не вызывается.
 #define configUSE_TICK_HOOK         0                                      // После каждого системного тика функция пользователя не вызывается.
-#define configCPU_CLOCK_HZ          ( ( unsigned long ) 120000000 )
+#define configCPU_CLOCK_HZ          ( ( unsigned long ) 25000000 )
 #define configTICK_RATE_HZ          ( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES        ( 5 )
 #define configMINIMAL_STACK_SIZE    ( ( unsigned short ) 300 )
-#define configTOTAL_HEAP_SIZE       ( ( size_t ) ( 20 * 1024 ) )
+#define configTOTAL_HEAP_SIZE       ( ( size_t ) ( 10 * 1024 ) )
 #define configMAX_TASK_NAME_LEN     ( 10 )
 #define configUSE_TRACE_FACILITY    1
 #define configUSE_16_BIT_TICKS      0
@@ -22,7 +26,7 @@
 #define configGENERATE_RUN_TIME_STATS   0
 
 /* Co-routine definitions. */
-#define configUSE_CO_ROUTINES       0
+#define configUSE_CO_ROUTINES           0
 #define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
 
 #define configUSE_TIMERS                1
@@ -44,9 +48,19 @@ configKERNEL_INTERRUPT_PRIORITY setting.  Here 15 corresponds to the lowest
 NVIC value of 255. */
 #define configLIBRARY_KERNEL_INTERRUPT_PRIORITY 15
 
+#define INCLUDE_vTaskDelayUntil        1                                        // Для работы _vTaskDelayUntil.
+
+extern void xPortPendSVHandler( void ) __attribute__ (( naked ));
+extern void xPortSysTickHandler( void );
+extern void vPortSVCHandler( void ) __attribute__ (( naked ));
+
 /*
  * FreeRTOS забирает себе эти 2 handler-а.
  */
-#define vPortSVCHandler     sv_call_handler
-#define xPortPendSVHandler  pend_sv_handler
-#define xPortSysTickHandler sys_tick_handler
+#define sv_call_handler     vPortSVCHandler
+#define pend_sv_handler     xPortPendSVHandler
+#define sys_tick_handler    xPortSysTickHandler
+
+#ifdef __cplusplus
+}
+#endif
