@@ -1,7 +1,7 @@
 # Собираем все необходимые .h файлы FreeRTOS.
 
-ifndef FREE_RTOS_C_FLAGS
-	FREE_RTOS_C_FLAGS = $(C_FLAGS)
+ifndef MODULE_FREE_RTOS_OPTIMIZATION
+	MODULE_FREE_RTOS_OPTIMIZATION = -g3 -O0
 endif
 
 # FreeRTOS.h должен обязательно идти первым! 
@@ -34,7 +34,7 @@ FREE_RTOS_INCLUDE_FILE		:= -include"./module_freertos_for_stm32f2/include/StackM
 build/obj/module_freertos_for_stm32f2/%.o:	module_freertos_for_stm32f2/%.c 
 	@echo [CC] $<
 	@mkdir -p $(dir $@)
-	@$(CC) $(FREE_RTOS_C_FLAGS) $(FREE_RTOS_PATH) $(USER_CFG_PATH) $(FREE_RTOS_INCLUDE_FILE) -c $< -o $@
+	@$(CC) $(C_FLAGS) $(MODULE_FREE_RTOS_OPTIMIZATION) $(FREE_RTOS_PATH) $(USER_CFG_PATH) $(FREE_RTOS_INCLUDE_FILE) -c $< -o $@
 
 
 # Добавляем к общим переменным проекта.
