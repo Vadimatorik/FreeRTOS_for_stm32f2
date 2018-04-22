@@ -1,4 +1,32 @@
-#pragma once
+/*
+ * FreeRTOS Kernel V10.0.1
+ * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
+ *
+ * 1 tab == 4 spaces!
+ */
+
+#ifndef MPU_WRAPPERS_H
+#define MPU_WRAPPERS_H
 
 /* This file redefines API functions to be called through a wrapper macro, but
 only for ports that are using the MPU. */
@@ -60,7 +88,9 @@ only for ports that are using the MPU. */
 
 		/* Map standard queue.h API functions to the MPU equivalents. */
 		#define xQueueGenericSend						MPU_xQueueGenericSend
-		#define xQueueGenericReceive					MPU_xQueueGenericReceive
+		#define xQueueReceive							MPU_xQueueReceive
+		#define xQueuePeek								MPU_xQueuePeek
+		#define xQueueSemaphoreTake						MPU_xQueueSemaphoreTake
 		#define uxQueueMessagesWaiting					MPU_uxQueueMessagesWaiting
 		#define uxQueueSpacesAvailable					MPU_uxQueueSpacesAvailable
 		#define vQueueDelete							MPU_vQueueDelete
@@ -107,8 +137,28 @@ only for ports that are using the MPU. */
 		#define xEventGroupSync							MPU_xEventGroupSync
 		#define vEventGroupDelete						MPU_vEventGroupDelete
 
-		/* Remove the privileged function macro. */
+		/* Map standard message/stream_buffer.h API functions to the MPU
+		equivalents. */
+		#define xStreamBufferSend						MPU_xStreamBufferSend
+		#define xStreamBufferSendFromISR				MPU_xStreamBufferSendFromISR
+		#define xStreamBufferReceive					MPU_xStreamBufferReceive
+		#define xStreamBufferReceiveFromISR				MPU_xStreamBufferReceiveFromISR
+		#define vStreamBufferDelete						MPU_vStreamBufferDelete
+		#define xStreamBufferIsFull						MPU_xStreamBufferIsFull
+		#define xStreamBufferIsEmpty					MPU_xStreamBufferIsEmpty
+		#define xStreamBufferReset						MPU_xStreamBufferReset
+		#define xStreamBufferSpacesAvailable			MPU_xStreamBufferSpacesAvailable
+		#define xStreamBufferBytesAvailable				MPU_xStreamBufferBytesAvailable
+		#define xStreamBufferSetTriggerLevel			MPU_xStreamBufferSetTriggerLevel
+		#define xStreamBufferGenericCreate				MPU_xStreamBufferGenericCreate
+		#define xStreamBufferGenericCreateStatic		MPU_xStreamBufferGenericCreateStatic
+
+
+		/* Remove the privileged function macro, but keep the PRIVILEGED_DATA
+		macro so applications can place data in privileged access sections
+		(useful when using statically allocated objects). */
 		#define PRIVILEGED_FUNCTION
+		#define PRIVILEGED_DATA __attribute__((section("privileged_data")))
 
 	#else /* MPU_WRAPPERS_INCLUDED_FROM_API_FILE */
 
@@ -123,4 +173,9 @@ only for ports that are using the MPU. */
 	#define PRIVILEGED_FUNCTION
 	#define PRIVILEGED_DATA
 	#define portUSING_MPU_WRAPPERS 0
+
 #endif /* portUSING_MPU_WRAPPERS */
+
+
+#endif /* MPU_WRAPPERS_H */
+

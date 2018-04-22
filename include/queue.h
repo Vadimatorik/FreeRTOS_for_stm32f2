@@ -1,4 +1,33 @@
-#pragma once
+/*
+ * FreeRTOS Kernel V10.0.1
+ * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
+ *
+ * 1 tab == 4 spaces!
+ */
+
+
+#ifndef QUEUE_H
+#define QUEUE_H
 
 #ifndef INC_FREERTOS_H
 	#error "include FreeRTOS.h" must appear in source files before "include queue.h"
@@ -210,8 +239,6 @@ typedef void * QueueSetMemberHandle_t;
 								   TickType_t		xTicksToWait
 							   );
  * </pre>
- *
- * This is a macro that calls xQueueGenericSend().
  *
  * Post an item to the front of a queue.  The item is queued by copy, not by
  * reference.  This function must not be called from an interrupt service
@@ -625,11 +652,9 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue, const void * const pvItemToQ
  * <pre>
  BaseType_t xQueuePeek(
 							 QueueHandle_t xQueue,
-							 void *pvBuffer,
+							 void * const pvBuffer,
 							 TickType_t xTicksToWait
 						 );</pre>
- *
- * This is a macro that calls the xQueueGenericReceive() function.
  *
  * Receive an item from a queue without removing the item from the queue.
  * The item is received by copy so a buffer of adequate size must be
@@ -711,10 +736,10 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue, const void * const pvItemToQ
 	// ... Rest of task code.
  }
  </pre>
- * \defgroup xQueueReceive xQueueReceive
+ * \defgroup xQueuePeek xQueuePeek
  * \ingroup QueueManagement
  */
-#define xQueuePeek( xQueue, pvBuffer, xTicksToWait ) xQueueGenericReceive( ( xQueue ), ( pvBuffer ), ( xTicksToWait ), pdTRUE )
+BaseType_t xQueuePeek( QueueHandle_t xQueue, void * const pvBuffer, TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
 /**
  * queue. h
@@ -757,8 +782,6 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue, void * const pvBuffer ) PRIV
 								 void *pvBuffer,
 								 TickType_t xTicksToWait
 							);</pre>
- *
- * This is a macro that calls the xQueueGenericReceive() function.
  *
  * Receive an item from a queue.  The item is received by copy so a buffer of
  * adequate size must be provided.  The number of bytes copied into the buffer
@@ -840,106 +863,7 @@ BaseType_t xQueuePeekFromISR( QueueHandle_t xQueue, void * const pvBuffer ) PRIV
  * \defgroup xQueueReceive xQueueReceive
  * \ingroup QueueManagement
  */
-#define xQueueReceive( xQueue, pvBuffer, xTicksToWait ) xQueueGenericReceive( ( xQueue ), ( pvBuffer ), ( xTicksToWait ), pdFALSE )
-
-
-/**
- * queue. h
- * <pre>
- BaseType_t xQueueGenericReceive(
-									   QueueHandle_t	xQueue,
-									   void	*pvBuffer,
-									   TickType_t	xTicksToWait
-									   BaseType_t	xJustPeek
-									);</pre>
- *
- * It is preferred that the macro xQueueReceive() be used rather than calling
- * this function directly.
- *
- * Receive an item from a queue.  The item is received by copy so a buffer of
- * adequate size must be provided.  The number of bytes copied into the buffer
- * was defined when the queue was created.
- *
- * This function must not be used in an interrupt service routine.  See
- * xQueueReceiveFromISR for an alternative that can.
- *
- * @param xQueue The handle to the queue from which the item is to be
- * received.
- *
- * @param pvBuffer Pointer to the buffer into which the received item will
- * be copied.
- *
- * @param xTicksToWait The maximum amount of time the task should block
- * waiting for an item to receive should the queue be empty at the time
- * of the call.	 The time is defined in tick periods so the constant
- * portTICK_PERIOD_MS should be used to convert to real time if this is required.
- * xQueueGenericReceive() will return immediately if the queue is empty and
- * xTicksToWait is 0.
- *
- * @param xJustPeek When set to true, the item received from the queue is not
- * actually removed from the queue - meaning a subsequent call to
- * xQueueReceive() will return the same item.  When set to false, the item
- * being received from the queue is also removed from the queue.
- *
- * @return pdTRUE if an item was successfully received from the queue,
- * otherwise pdFALSE.
- *
- * Example usage:
-   <pre>
- struct AMessage
- {
-	char ucMessageID;
-	char ucData[ 20 ];
- } xMessage;
-
- QueueHandle_t xQueue;
-
- // Task to create a queue and post a value.
- void vATask( void *pvParameters )
- {
- struct AMessage *pxMessage;
-
-	// Create a queue capable of containing 10 pointers to AMessage structures.
-	// These should be passed by pointer as they contain a lot of data.
-	xQueue = xQueueCreate( 10, sizeof( struct AMessage * ) );
-	if( xQueue == 0 )
-	{
-		// Failed to create the queue.
-	}
-
-	// ...
-
-	// Send a pointer to a struct AMessage object.  Don't block if the
-	// queue is already full.
-	pxMessage = & xMessage;
-	xQueueSend( xQueue, ( void * ) &pxMessage, ( TickType_t ) 0 );
-
-	// ... Rest of task code.
- }
-
- // Task to receive from the queue.
- void vADifferentTask( void *pvParameters )
- {
- struct AMessage *pxRxedMessage;
-
-	if( xQueue != 0 )
-	{
-		// Receive a message on the created queue.  Block for 10 ticks if a
-		// message is not immediately available.
-		if( xQueueGenericReceive( xQueue, &( pxRxedMessage ), ( TickType_t ) 10 ) )
-		{
-			// pcRxedMessage now points to the struct AMessage variable posted
-			// by vATask.
-		}
-	}
-
-	// ... Rest of task code.
- }
- </pre>
- * \defgroup xQueueReceive xQueueReceive
- * \ingroup QueueManagement
- */
-BaseType_t xQueueGenericReceive( QueueHandle_t xQueue, void * const pvBuffer, TickType_t xTicksToWait, const BaseType_t xJustPeek ) PRIVILEGED_FUNCTION;
+BaseType_t xQueueReceive( QueueHandle_t xQueue, void * const pvBuffer, TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 
 /**
  * queue. h
@@ -1489,7 +1413,9 @@ QueueHandle_t xQueueCreateMutex( const uint8_t ucQueueType ) PRIVILEGED_FUNCTION
 QueueHandle_t xQueueCreateMutexStatic( const uint8_t ucQueueType, StaticQueue_t *pxStaticQueue ) PRIVILEGED_FUNCTION;
 QueueHandle_t xQueueCreateCountingSemaphore( const UBaseType_t uxMaxCount, const UBaseType_t uxInitialCount ) PRIVILEGED_FUNCTION;
 QueueHandle_t xQueueCreateCountingSemaphoreStatic( const UBaseType_t uxMaxCount, const UBaseType_t uxInitialCount, StaticQueue_t *pxStaticQueue ) PRIVILEGED_FUNCTION;
+BaseType_t xQueueSemaphoreTake( QueueHandle_t xQueue, TickType_t xTicksToWait ) PRIVILEGED_FUNCTION;
 void* xQueueGetMutexHolder( QueueHandle_t xSemaphore ) PRIVILEGED_FUNCTION;
+void* xQueueGetMutexHolderFromISR( QueueHandle_t xSemaphore ) PRIVILEGED_FUNCTION;
 
 /*
  * For internal use only.  Use xSemaphoreTakeMutexRecursive() or
@@ -1722,4 +1648,6 @@ uint8_t ucQueueGetQueueType( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* QUEUE_H */
 

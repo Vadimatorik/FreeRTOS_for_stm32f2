@@ -25,7 +25,7 @@ FREE_RTOS_OBJ_FILE			:= $(addprefix build/obj/, $(FREE_RTOS_C_FILE))
 # Затем меняем у всех .c на .o.
 FREE_RTOS_OBJ_FILE			:= $(patsubst %.c, %.o, $(FREE_RTOS_OBJ_FILE))
 	
-FREE_RTOS_INCLUDE_FILE		:= -include"./module_freertos_for_stm32f2/include/StackMacros.h"
+FREE_RTOS_INCLUDE_FILE		:= -include"./module_freertos_for_stm32f2/include/stack_macros.h"
 
 # Сборка FreeRTOS.
 # $< - текущий .c файл (зависемость).

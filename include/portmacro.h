@@ -1,4 +1,33 @@
-#pragma once
+/*
+ * FreeRTOS Kernel V10.0.1
+ * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * http://www.FreeRTOS.org
+ * http://aws.amazon.com/freertos
+ *
+ * 1 tab == 4 spaces!
+ */
+
+
+#ifndef PORTMACRO_H
+#define PORTMACRO_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +83,7 @@ typedef unsigned long UBaseType_t;
 																				\
 	/* Barriers are normally not required but do ensure the code is completely	\
 	within the specified behaviour for the architecture. */						\
-	__asm volatile( "dsb" );													\
+	__asm volatile( "dsb" ::: "memory" );										\
 	__asm volatile( "isb" );													\
 }
 
@@ -102,7 +131,7 @@ not necessary for to use this port.  They are defined so the common demo files
 	{
 	uint8_t ucReturn;
 
-		__asm volatile ( "clz %0, %1" : "=r" ( ucReturn ) : "r" ( ulBitmap ) );
+		__asm volatile ( "clz %0, %1" : "=r" ( ucReturn ) : "r" ( ulBitmap ) : "memory" );
 		return ucReturn;
 	}
 
@@ -143,7 +172,7 @@ uint32_t ulCurrentInterrupt;
 BaseType_t xReturn;
 
 	/* Obtain the number of the currently executing interrupt. */
-	__asm volatile( "mrs %0, ipsr" : "=r"( ulCurrentInterrupt ) );
+	__asm volatile( "mrs %0, ipsr" : "=r"( ulCurrentInterrupt ) :: "memory" );
 
 	if( ulCurrentInterrupt == 0 )
 	{
@@ -165,11 +194,11 @@ uint32_t ulNewBASEPRI;
 
 	__asm volatile
 	(
-		"	mov %0, %1												\n"	\
+		"	mov %0, %1												\n" \
 		"	msr basepri, %0											\n" \
 		"	isb														\n" \
 		"	dsb														\n" \
-		:"=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
+		:"=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
 	);
 }
 
@@ -182,11 +211,11 @@ uint32_t ulOriginalBASEPRI, ulNewBASEPRI;
 	__asm volatile
 	(
 		"	mrs %0, basepri											\n" \
-		"	mov %1, %2												\n"	\
+		"	mov %1, %2												\n" \
 		"	msr basepri, %1											\n" \
 		"	isb														\n" \
 		"	dsb														\n" \
-		:"=r" (ulOriginalBASEPRI), "=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY )
+		:"=r" (ulOriginalBASEPRI), "=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
 	);
 
 	/* This return will not be reached but is necessary to prevent compiler
@@ -199,7 +228,7 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
 {
 	__asm volatile
 	(
-		"	msr basepri, %0	" :: "r" ( ulNewMaskValue )
+		"	msr basepri, %0	" :: "r" ( ulNewMaskValue ) : "memory"
 	);
 }
 /*-----------------------------------------------------------*/
@@ -208,3 +237,6 @@ portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* PORTMACRO_H */
+
